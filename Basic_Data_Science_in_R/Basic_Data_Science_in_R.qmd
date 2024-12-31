@@ -1,0 +1,197 @@
+---
+title: "Introduction to Data Manipulation with R and Tidyverse"
+number-sections: true
+toc: true
+toc-title: "Table of Contents"
+---
+
+# Introduction
+
+In this document, we’ll explore how to perform basic data manipulation and analysis using R and the **tidyverse** package. This tutorial is designed for beginners and provides a step-by-step guide to understanding key operations such as filtering, selecting columns, creating new variables, and summarizing data.
+
+We’ll start by working with a simple dataset stored in an Excel file. The dataset contains information about countries, their continents, the year of observation, and life expectancy. Using the tidyverse, we’ll demonstrate how to:
+
+1. Load and inspect data from an Excel file.
+2. Filter rows based on specific criteria.
+3. Select specific columns to focus on relevant data.
+4. Create new variables by transforming existing ones.
+5. Summarize data to gain insights.
+
+By the end of this tutorial, you’ll have a foundational understanding of how to manipulate data in R, preparing you for more advanced data science tasks.
+
+# Installation(s)
+
+## Posit/RStudio Desktop (and R)
+
+We'll be developing our code in Posit (formerly known as RStudio). You'll need to install it on your system, if it's not already. You can download it via https://posit.co/downloads/. Click the 'Download RStudio' button on that page, no need for RStudio Server for now. Also no need to buy the 'Pro' version. There's really plenty (if not all) you can do for free!
+
+The RStudio download will guide you to also have R (itself) installed. Just follow instructions and do install R.
+
+R is the script interpretor, RStudio (Posit nowadays) is the Integrated Development Environment (IDE) that has onboard everything you might need. When you compare RStudio to a car, R is the engine.
+
+## R Packages
+
+Next install the R package called 'tidyverse'. Tidyverse is an umbrella package: a package of packages, all centered around data manipulation. 
+
+You can install packages 
+	- by entering the command `install.packages("tidyverse")` in the console window, or
+	- visually by clicking on the 'Packages' window - click 'Install' button, enter 'tidyverse' and enter 'Install'. See the picture below.
+
+<img src="Install_Packages.png" alt="Install Packages" width="400"/>
+
+If you want to read more about tidyverse, which is excellently documented, visit: [Tidyverse Official Site](https://www.tidyverse.org/)
+
+# Coding preparation
+
+## First basic syntax
+
+- **Comments in R**: Comments are lines in your code that are not executed. They start with a `#` and are used to explain what the code does, making it easier for others (or yourself) to understand your work. For example:
+  ```r
+  # This is a comment and will not be run
+  x <- 5  # Assigns 5 to x
+  ```
+  Comments are essential for documenting your code and explaining complex logic.
+
+- **Assignments in R**: Assignments in R allow you to store the result of a computation or data operation into a variable. This is typically done using `<-`, which is a convention for clarity, but `=` can also be used. For example:
+  ```r
+  x <- 10  # Assigns the value 10 to the variable x
+  y = 20   # Does the same, but is less commonly used in R scripts
+  ```
+  Once assigned, you can use the variable `x` in subsequent operations. For instance:
+  ```r
+  result <- x + 5  # Adds 5 to x and stores the result in 'result'
+  ```
+- **The `%>%` operator**: Known as the pipe, it comes from the magrittr package (part of tidyverse). It allows you to chain commands in a left-to-right, top-to-bottom style.
+  - Using `%>%` helps avoid deeply nested function calls and makes your code more readable.
+  - For example, instead of `mean(round(c(1.5, 2.5, 3.5)))`, you can write:
+    ```r
+    c(1.5, 2.5, 3.5) %>% round() %>% mean()
+    ```
+- This tutorial demonstrates how to use `%>%` effectively.
+
+- **The `c()` function**: The `c()` function in R creates a vector (a one-dimensional array). Arrays are collections of data elements of the same type.
+  - For example, `c(1, 2, 3)` creates a numeric vector containing the values `1`, `2`, and `3`.
+  - so `c(1, 2, 3)` is mostly read as 'An array/vector consisting of the elements `1`, `2` and `3`'.
+
+
+## Example data table
+
+The following table is used as an example in this document. We already saved it for you as an Excel file named `example_data.xlsx`.
+
+| Country       | Continent | Year | LifeExp |
+|---------------|-----------|------|---------|
+| Netherlands   | Europe    | 2007 | 80.6    |
+| Germany       | Europe    | 2007 | 79.8    |
+| Nigeria       | Africa    | 2007 | 46.9    |
+| South Africa  | Africa    | 2007 | 49.0    |
+| China         | Asia      | 2007 | 72.9    |
+| India         | Asia      | 2007 | 64.7    |
+
+
+# Now let's CODE!
+
+## Code listing
+
+In the following blueish blocks you see code examples. 
+
+Here's the code, with no comments and no output. We'll print the output along with it as well, after this code block. So later on we'll repeat the code and also see the output in between the blueish code blocks. First the 'bare' code unevaluated:
+
+```{r, eval=F}
+library(tidyverse) 
+library(readxl)
+
+file_path <- "example_data.xlsx" 
+data <- read_excel(file_path)
+
+data_2007 <- data %>%
+  filter(Year == 2007)
+
+data_selected <- data_2007 %>%
+  select(Country, Continent, LifeExp)
+
+data_with_months <- data_selected %>%
+  mutate(LifeExp_Months = LifeExp * 12)
+
+lifeExp_summary <- data_with_months %>%
+  group_by(Continent) %>%
+  summarise(Mean_LifeExp = mean(LifeExp))
+
+```
+
+## Same code, now with evaluation (and comments)
+
+Now let's have the code evaluated as well. In between the blueish code blocks are the outputs on white backgroud. In RStudio you'll see that output in the console window.
+
+```{r}
+
+# First, install and load the required packages
+# Uncomment (= remove the '# ' at the start) the following lines if the packages are not installed yet.
+# Uncommenting can also be done by selecting the line(s) and pressing Ctrl-Shift-C (Cmd-Shift-C on Mac)
+# install.packages("tidyverse")
+# install.packages("readxl")
+
+# The next lines of code you don't need to understand yet. They're provided as a convenience for you to 
+# and install the required packages if they turned out not to be installed yet.
+# Mostly, however, this is done like in the lines 4 and 5 lines than this one.
+
+# Check and install required packages (again: for now don't bother about these 'if blocks')
+if (!require(tidyverse, quietly=T)) {
+  install.packages("tidyverse")
+}
+# Note that tidyverse is quite verbose (you can ignore that output, also ignore the 'Conflicts')
+if (!require(readxl)) {
+  install.packages("readxl")
+}
+
+# Load the libraries 
+# this is line 1 in most scripts)
+library(tidyverse) 
+library(readxl)
+
+# Step 1: Read an Excel file
+# Make sure you have an Excel file named "example_data.xlsx": should be provided to you already
+# with a table like the one described above.
+
+# the character string "example_data.xlsx" is assigned to variable file_path next
+file_path <- "example_data.xlsx" 
+# and likewise the result of the function `read_excel` called with `file_path` as argument, 
+# will be kept in-memory in the variable called `data`.
+data <- read_excel(file_path)
+
+# View the first few rows of the data
+head(data)
+
+# Step 2: Filter the data
+# We only want data for the year 2007
+data_2007 <- data %>%
+  filter(Year == 2007)
+
+# View the first few rows of the filtered data
+head(data_2007)
+
+# Step 3: Select specific columns
+# Keep only the columns 'Country', 'Continent', and 'LifeExp'
+data_selected <- data_2007 %>%
+  select(Country, Continent, LifeExp)
+
+# View the first few rows of the selected data
+head(data_selected)
+
+# Step 4: Add a new column
+# Calculate life expectancy in months and add it as a new column
+data_with_months <- data_selected %>%
+  mutate(LifeExp_Months = LifeExp * 12)
+
+# View the first few rows of the modified data
+head(data_with_months)
+
+# Step 5: Summarize the data
+# Calculate the average life expectancy per continent
+lifeExp_summary <- data_with_months %>%
+  group_by(Continent) %>%
+  summarise(Mean_LifeExp = mean(LifeExp))
+
+# View the summary
+print(lifeExp_summary)
+
+```
